@@ -21,7 +21,7 @@ function App() {
   useEffect(() => {
     const loadCSVData = async () => {
       try {
-        const response = await fetch('/src/data/sf_events_filtered.csv');
+        const response = await fetch('/data/merged_events.csv');
         const csvText = await response.text();
         const parsedEvents = parseCSV(csvText);
         setEvents(parsedEvents);
