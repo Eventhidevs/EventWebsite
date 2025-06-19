@@ -88,16 +88,24 @@ function App() {
       <Hero />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col md:flex-row gap-8 mb-8 items-stretch">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
           <Filters
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
             categories={categories}
+            compact
           />
           <CalendarBox
             selectedDates={selectedDates}
             setSelectedDates={setSelectedDates}
+            compact
           />
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-white px-4 py-2 rounded-lg font-semibold shadow hover:shadow-md transition-all text-sm h-12 min-w-[120px]" style={{ background: 'rgb(114, 78, 153)' }}
+          >
+            Submit Event
+          </button>
         </div>
 
         <div className="flex items-center justify-between mb-8">
@@ -109,13 +117,6 @@ function App() {
               {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'}
             </span>
           </div>
-          
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
-          >
-            Submit Event
-          </button>
         </div>
 
         <EventsByDate events={filteredEvents} />

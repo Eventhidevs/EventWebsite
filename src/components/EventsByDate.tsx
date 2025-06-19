@@ -144,13 +144,13 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
       {currentPageEvents.map(({ date, events }) => (
         <div key={date} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           {/* Date Header */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+          <div className="bg-gradient-to-r" style={{ background: 'rgba(114, 78, 153, 0.08)' }}>
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
+              <div style={{ background: 'rgb(114, 78, 153)' }} className="p-2 rounded-lg">
                 <Calendar className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{formatDate(date)}</h2>
+                <h2 className="text-xl font-bold" style={{ color: 'rgb(114, 78, 153)' }}>{formatDate(date)}</h2>
                 <p className="text-sm text-gray-600">
                   {events.length} {events.length === 1 ? 'event' : 'events'}
                 </p>
@@ -176,15 +176,16 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                     <div className="flex flex-col sm:flex-row sm:items-start gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(event.event_category)}`}>
-                            <Tag className="h-3 w-3 inline mr-1" />
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium`} style={{ background: 'rgba(114, 78, 153, 0.08)', color: 'rgb(114, 78, 153)' }}>
+                            <Tag className="h-3 w-3 inline mr-1" style={{ color: 'rgb(114, 78, 153)' }} />
                             {event.event_category}
                           </span>
                         </div>
                         
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          <a href={event.event_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                          <a href={event.event_url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
                             {event.event_name}
+                            <ExternalLink className="h-4 w-4 inline ml-1 align-middle" style={{ color: 'rgb(114, 78, 153)' }} />
                           </a>
                         </h3>
                         

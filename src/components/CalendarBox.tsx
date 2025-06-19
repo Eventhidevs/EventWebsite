@@ -5,18 +5,20 @@ import 'react-datepicker/dist/react-datepicker.css';
 interface CalendarBoxProps {
   selectedDates: { start: Date | null; end: Date | null };
   setSelectedDates: (dates: { start: Date | null; end: Date | null }) => void;
+  compact?: boolean;
 }
 
-const CalendarBox: React.FC<CalendarBoxProps> = ({ selectedDates, setSelectedDates }) => {
+const CalendarBox: React.FC<CalendarBoxProps> = ({ selectedDates, setSelectedDates, compact = false }) => {
   // For simplicity, use native input type="date" for both single and range selection
   const [rangeMode, setRangeMode] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full md:w-[420px] flex flex-col items-center justify-center min-h-[180px]">
-      <div className="flex items-center justify-between w-full mb-4">
-        <span className="text-lg font-semibold text-gray-900">Select Date</span>
+    <div className={`bg-white rounded-2xl shadow-lg border border-gray-100 ${compact ? 'p-4 min-h-0' : 'p-8 min-h-[180px]'} w-full md:w-[320px] flex flex-col items-center justify-center`}>
+      <div className={`flex items-center justify-between w-full ${compact ? 'mb-2' : 'mb-4'}`}>
+        <span style={{ color: 'rgb(114, 78, 153)' }} className={`font-semibold ${compact ? 'text-base' : 'text-lg'}`}>Select Date</span>
         <button
-          className={`ml-2 px-3 py-1 text-xs rounded-full transition ${rangeMode ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'} hover:bg-blue-200`}
+          style={rangeMode ? { backgroundColor: 'rgb(114, 78, 153)', color: 'white' } : {}}
+          className={`ml-2 px-3 py-1 text-xs rounded-full transition ${rangeMode ? '' : 'bg-gray-100 text-gray-700'} hover:opacity-90`}
           onClick={() => setRangeMode((prev) => !prev)}
         >
           {rangeMode ? 'Date Range' : 'Date Range'}
@@ -33,7 +35,7 @@ const CalendarBox: React.FC<CalendarBoxProps> = ({ selectedDates, setSelectedDat
             }}
             isClearable
             placeholderText="Select date range"
-            className="border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 w-full text-center"
+            className={`border border-gray-200 rounded-lg ${compact ? 'px-2 py-2 text-sm' : 'px-4 py-2'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 w-full text-center`}
             calendarClassName="!rounded-xl !shadow-lg"
           />
         </div>
@@ -44,7 +46,7 @@ const CalendarBox: React.FC<CalendarBoxProps> = ({ selectedDates, setSelectedDat
             onChange={(date: Date | null) => setSelectedDates({ start: date, end: null })}
             isClearable
             placeholderText="Select date"
-            className="border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 w-full text-center"
+            className={`border border-gray-200 rounded-lg ${compact ? 'px-2 py-2 text-sm' : 'px-4 py-2'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 w-full text-center`}
             calendarClassName="!rounded-xl !shadow-lg"
           />
         </div>
