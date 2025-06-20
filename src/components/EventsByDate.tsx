@@ -179,6 +179,12 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                           <span className={`px-3 py-1 rounded-full text-xs font-medium`} style={{ background: 'rgba(114, 78, 153, 0.08)', color: 'rgb(114, 78, 153)' }}>
                             <Tag className="h-3 w-3 inline mr-1" style={{ color: 'rgb(114, 78, 153)' }} />
                             {event.event_category}
+                            {event.price_cents && !isNaN(Number(event.price_cents)) && Number(event.price_cents) > 0 && (
+                              <span className="ml-2 text-green-700 font-semibold">${(Number(event.price_cents) / 100).toFixed(2)}</span>
+                            )}
+                            {event.price_cents && (!isNaN(Number(event.price_cents)) && Number(event.price_cents) === 0) && (
+                              <span className="ml-2 text-blue-700 font-semibold">Free</span>
+                            )}
                           </span>
                         </div>
                         

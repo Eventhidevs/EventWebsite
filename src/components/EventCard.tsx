@@ -13,6 +13,7 @@ interface Event {
   end_date: string;
   end_time: string;
   event_category: string;
+  price_cents: string;
 }
 
 interface EventCardProps {
@@ -61,6 +62,12 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(event.event_category)}`}>
                 <Tag className="h-3 w-3 inline mr-1" />
                 {event.event_category}
+                {event.price_cents && !isNaN(Number(event.price_cents)) && Number(event.price_cents) > 0 && (
+                  <span className="ml-2 text-green-700 font-semibold">${(Number(event.price_cents) / 100).toFixed(2)}</span>
+                )}
+                {event.price_cents && (!isNaN(Number(event.price_cents)) && Number(event.price_cents) === 0) && (
+                  <span className="ml-2 text-blue-700 font-semibold">Free</span>
+                )}
               </span>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">

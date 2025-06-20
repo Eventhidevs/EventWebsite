@@ -10,6 +10,7 @@ export interface Event {
   end_date: string;
   end_time: string;
   event_category: string;
+  price_cents: string;
 }
 
 export function parseCSV(csvText: string): Event[] {
