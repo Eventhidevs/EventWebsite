@@ -194,7 +194,7 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500">
                           <div className="flex items-center">
                             <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                            <span className="truncate">{event.region}</span>
+                            <span className="truncate">{event.full_address}</span>
                           </div>
                           <div className="flex items-center">
                             <User className="h-4 w-4 mr-1 flex-shrink-0" />

@@ -85,7 +85,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="line-clamp-1">{event.region}</span>
+            <span className="line-clamp-1">{event.full_address}</span>
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <User className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -95,7 +95,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500">
-            {event.region}
+            {event.full_address}
           </span>
         </div>
       </div>
