@@ -213,38 +213,39 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
 
       {/* Pagination Controls - Only show if we should paginate */}
       {shouldPaginate && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-8">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-8 w-full">
           <button
             onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed bg-white transition-colors"
+            style={{ minWidth: '90px' }}
           >
             <ChevronLeft className="h-4 w-4" />
-            Previous
+            <span className="hidden xs:inline">Previous</span>
           </button>
-          
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 max-w-full overflow-x-auto">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={`w-8 h-8 rounded-lg ${
+                className={`w-8 h-8 rounded-lg font-semibold transition-colors ${
                   currentPage === page
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-[#724E99] text-white shadow-md'
+                    : 'text-gray-700 hover:bg-purple-100 bg-white'
                 }`}
+                style={{ minWidth: '2rem' }}
               >
                 {page}
               </button>
             ))}
           </div>
-
           <button
             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed bg-white transition-colors"
+            style={{ minWidth: '70px' }}
           >
-            Next
+            <span className="hidden xs:inline">Next</span>
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

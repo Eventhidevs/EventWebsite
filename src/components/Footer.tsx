@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
             </div>
             <div className="text-xl font-semibold text-gray-900 mt-4">Whether you're starting out or upskilling, HiDevs helps you get there.</div>
             <div className="text-lg text-gray-700 mt-2 mb-4">
-              Visit: <a href="https://hidevs.xyz" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold">hidevs.xyz</a>
+              Visit: <a href="https://hidevs.xyz" target="_blank" rel="noopener noreferrer" className="font-semibold underline text-[#724E99]">hidevs.xyz</a>
             </div>
             <div className="flex items-center gap-4 mt-4">
               <a href="https://www.linkedin.com/company/hidevs-gen-ai-workforce/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center text-blue-700 hover:text-blue-900 transition text-2xl">

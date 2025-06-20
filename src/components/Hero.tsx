@@ -18,7 +18,7 @@ const Hero: React.FC = () => {
           {/* Right: Text Content */}
           <div className="flex-1 flex flex-col justify-center mt-0">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight max-w-full mb-4 whitespace-normal">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">San Francisco</span>
+              <span className="text-[#724E99]">San Francisco</span>
               <span className="text-black">’s Event Scene - All in One Place</span>
             </h1>
             <div className="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl font-normal mb-2">
