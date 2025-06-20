@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, MapPin, Clock, User, Tag, FileText, Link, Mail } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -47,11 +48,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate email sending
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    try {
+      await emailjs.send(
+        'service_wpcsqa8',
+        'template_gpxoh3o',
+        {
+          // These keys must match your template variables
+          event_name: formData.event_name,
+          event_url: formData.event_url,
+          event_summary: formData.event_summary,
+          full_address: formData.full_address,
+          region: formData.region,
+          presented_by_name: formData.presented_by_name,
+          start_date: formData.start_date,
+          start_time: formData.start_time,
+          end_date: formData.end_date,
+          end_time: formData.end_time,
+          event_category: formData.event_category,
+          to_email: 'deepak@hidevs.xyz'
+        },
+        'yOAgflGcPF9mseaJ-'
+      );
+      setSubmitSuccess(true);
+    } catch (error) {
+      alert('Failed to send email. Please try again.');
+    }
     setIsSubmitting(false);
-    setSubmitSuccess(true);
     
     // Reset form after success
     setTimeout(() => {
