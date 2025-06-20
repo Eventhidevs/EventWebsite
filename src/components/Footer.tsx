@@ -7,8 +7,8 @@ import { FaLinkedin, FaYoutube } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-gray-200 py-8 px-2" style={{ background: '#FBF2FF' }}>
-      <div className="w-full rounded-3xl border border-gray-200 p-2 md:px-12 flex flex-col gap-2 bg-transparent shadow-lg">
+    <footer className="border-t border-gray-200 py-4 px-2" style={{ background: '#FBF2FF' }}>
+      <div className="w-full flex flex-col gap-2 bg-transparent">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
           {/* Left: HiDevs Info */}
           <div className="flex-[7] flex flex-col gap-2 min-w-[260px] justify-center md:pl-8">
