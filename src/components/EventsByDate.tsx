@@ -126,6 +126,15 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
+  // Helper to format price
+  const formatPrice = (price_cents: number) => {
+    if (price_cents <= 0) {
+      return <span className="ml-2 text-xs font-semibold bg-[#F3EAFE] text-[#724E99] px-2 py-1 rounded-full">Free</span>;
+    }
+    const dollars = price_cents / 100;
+    return <span className="ml-2 text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full">${dollars.toFixed(2)}</span>;
+  };
+
   if (sortedDates.length === 0) {
     return (
       <div className="text-center py-12">
@@ -179,13 +188,8 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                           <span className={`px-3 py-1 rounded-full text-xs font-medium`} style={{ background: 'rgba(114, 78, 153, 0.08)', color: 'rgb(114, 78, 153)' }}>
                             <Tag className="h-3 w-3 inline mr-1" style={{ color: 'rgb(114, 78, 153)' }} />
                             {event.event_category}
-                            {event.price_cents && !isNaN(Number(event.price_cents)) && Number(event.price_cents) > 0 && (
-                              <span className="ml-2 text-green-700 font-semibold">${(Number(event.price_cents) / 100).toFixed(2)}</span>
-                            )}
-                            {event.price_cents && (!isNaN(Number(event.price_cents)) && Number(event.price_cents) === 0) && (
-                              <span className="ml-2 text-blue-700 font-semibold">Free</span>
-                            )}
                           </span>
+                          {formatPrice(event.price_cents)}
                         </div>
                         
                         <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors flex items-center gap-2">

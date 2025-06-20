@@ -10,7 +10,7 @@ export interface Event {
   end_date: string;
   end_time: string;
   event_category: string;
-  price_cents: string;
+  price_cents: number;
 }
 
 export function parseCSV(csvText: string): Event[] {
@@ -27,6 +27,8 @@ export function parseCSV(csvText: string): Event[] {
       // Trim spaces for time fields
       if (header === 'start_time' || header === 'end_time') {
         event[header] = value.trim();
+      } else if (header === 'price_cents') {
+        event[header] = parseInt(value, 10) || 0;
       } else {
         event[header] = value;
       }
