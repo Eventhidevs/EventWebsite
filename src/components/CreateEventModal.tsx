@@ -105,7 +105,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
         <div className="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-              <Calendar className="h-6 w-6 mr-2 text-blue-600" />
+              <Calendar className="h-6 w-6 mr-2 text-[#724E99]" />
               Create New Event
             </h3>
             <button
@@ -313,7 +313,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-[#724E99] text-white rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Event'}
                 </button>

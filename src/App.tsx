@@ -113,7 +113,7 @@ function App() {
             <h2 className="text-2xl font-bold text-gray-900">
               {filteredEvents.length === events.length ? 'All Events' : 'Filtered Events'}
             </h2>
-            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            <span className="bg-[#F3EAFE] text-[#724E99] px-3 py-1 rounded-full text-sm font-medium">
               {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'}
             </span>
           </div>
