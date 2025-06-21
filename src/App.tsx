@@ -11,6 +11,7 @@ import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { TaskType } from "@google/generative-ai";
+import { Document } from "langchain/document";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
@@ -28,51 +29,57 @@ function App() {
   const theme = 'light';
 
   useEffect(() => {
-    const loadCSVData = async () => {
+    const loadDataAndEmbeddings = async () => {
       try {
-        const response = await fetch(`/data/dataBase.csv?timestamp=${new Date().getTime()}`);
-        const csvText = await response.text();
+        // Fetch both the event data and the pre-computed embeddings
+        const eventsResponse = await fetch(`/data/dataBase.csv?timestamp=${new Date().getTime()}`);
+        const embeddingsResponse = await fetch(`/data/embeddings.json?timestamp=${new Date().getTime()}`);
+
+        const csvText = await eventsResponse.text();
+        const embeddingMap = await embeddingsResponse.json();
+
         const parsedEvents = parseCSV(csvText);
         setEvents(parsedEvents);
 
-        // Create embeddings and vector store
-        if (import.meta.env.VITE_GEMINI_API_KEY) {
+        if (import.meta.env.VITE_GEMINI_API_KEY && embeddingMap) {
           const embeddings = new GoogleGenerativeAIEmbeddings({
             apiKey: import.meta.env.VITE_GEMINI_API_KEY,
             modelName: "embedding-001",
             taskType: TaskType.RETRIEVAL_QUERY,
           });
 
-          // Filter out events with empty descriptions for vector store
-          const eventsWithDescriptions = parsedEvents.filter(event => 
-            event.event_description && event.event_description.trim() !== ''
-          );
-          
-          const documents = eventsWithDescriptions.map(event => ({
-            pageContent: event.event_description,
-            metadata: { id: event.id },
-          }));
+          // Create the vector store from the pre-computed embeddings
+          const store = new MemoryVectorStore(embeddings);
 
-          try {
-            const store = await MemoryVectorStore.fromDocuments(documents, embeddings);
-            setVectorStore(store);
-          } catch (error) {
-            console.error("Error creating vector store:", error);
-            setVectorStore(null);
-          }
+          // Separate events and their corresponding vectors from the map
+          const documents: Document[] = [];
+          const vectors: number[][] = [];
+          
+          parsedEvents.forEach(event => {
+            if (embeddingMap[event.id]) {
+              documents.push(new Document({
+                pageContent: event.event_description,
+                metadata: { id: event.id },
+              }));
+              vectors.push(embeddingMap[event.id]);
+            }
+          });
+          
+          await store.addVectors(vectors, documents);
+          setVectorStore(store);
         } else {
-          console.error("Gemini API key not found. Please add it to your .env file.");
+          console.error("Could not load embeddings or find Gemini API key.");
         }
 
       } catch (error) {
-        console.error('Error loading CSV data:', error);
+        console.error('Error loading data and embeddings:', error);
         setEvents([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadCSVData();
+    loadDataAndEmbeddings();
   }, []);
 
   // Get unique categories from events
@@ -166,7 +173,8 @@ function App() {
     
     try {
       const results = await vectorStore.similaritySearch(semanticQuery, 10);
-      const resultIds = results.map((result: any) => result.metadata.id);
+      // The result type from similaritySearch with MemoryVectorStore is a Document.
+      const resultIds = results.map(result => result.metadata.id as string);
       setSemanticSearchResults(resultIds);
     } catch (error) {
       console.error("Semantic search failed:", error);
