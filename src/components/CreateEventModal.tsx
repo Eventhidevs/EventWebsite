@@ -51,6 +51,18 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // --- Validation Logic ---
+    const { start_date, start_time, end_date, end_time } = formData;
+    const startDateTime = new Date(`${start_date}T${start_time}`);
+    const endDateTime = new Date(`${end_date}T${end_time}`);
+
+    if (endDateTime <= startDateTime) {
+      alert('End date and time must be after the start date and time.');
+      return; // Stop the submission
+    }
+    // --- End Validation Logic ---
+
     setIsSubmitting(true);
     
     try {

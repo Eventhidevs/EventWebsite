@@ -264,20 +264,27 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
   );
 };
 
-const EventSummary: React.FC<{ summary: string }> = ({ summary }) => {
-  const [expanded, setExpanded] = useState(false);
-  const isLong = summary.split(' ').length > 30 || summary.length > 180;
-  if (!isLong) return <p className="text-gray-600 mb-3 leading-relaxed">{summary}</p>;
+const EventSummary: React.FC<{ summary: string | null | undefined }> = ({ summary }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  if (!summary) {
+    return null; // Return nothing if summary is null or undefined
+  }
+
+  const words = summary.split(' ');
+  const isLongSummary = words.length > 20;
+
+  if (!isLongSummary) return <p className="text-gray-600 mb-3 leading-relaxed">{summary}</p>;
   return (
     <div className="mb-3">
       <p className="text-gray-600 leading-relaxed">
-        {expanded ? summary : summary.slice(0, 180) + '...'}
+        {isExpanded ? summary : summary.slice(0, 180) + '...'}
       </p>
       <button
         className="text-blue-600 text-sm mt-1 underline focus:outline-none"
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => setIsExpanded((e) => !e)}
       >
-        {expanded ? 'Show Less' : 'Read More'}
+        {isExpanded ? 'Show Less' : 'Read More'}
       </button>
     </div>
   );

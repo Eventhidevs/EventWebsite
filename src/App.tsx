@@ -23,9 +23,10 @@ function App() {
   useEffect(() => {
     const loadCSVData = async () => {
       try {
-        const response = await fetch('/data/dataBase.csv');
+        const response = await fetch(`/data/dataBase.csv?timestamp=${new Date().getTime()}`);
         const csvText = await response.text();
         const parsedEvents = parseCSV(csvText);
+        console.log("Parsed Events:", parsedEvents);
         setEvents(parsedEvents);
       } catch (error) {
         console.error('Error loading CSV data:', error);

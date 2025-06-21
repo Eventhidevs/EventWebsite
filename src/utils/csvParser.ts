@@ -1,3 +1,5 @@
+import Papa from 'papaparse';
+
 export interface Event {
   event_name: string;
   event_url: string;
@@ -13,49 +15,23 @@ export interface Event {
   price_cents: number;
 }
 
-export function parseCSV(csvText: string): Event[] {
-  const lines = csvText.trim().split('\n');
-  const headers = parseCSVLine(lines[0]);
-  
-  return lines.slice(1).map(line => {
-    const values = parseCSVLine(line);
-    const event: any = {};
-    
-    headers.forEach((header, index) => {
-      let value = values[index] || '';
-      
-      // Trim spaces for time fields
-      if (header === 'start_time' || header === 'end_time') {
-        event[header] = value.trim();
-      } else if (header === 'price_cents') {
-        event[header] = parseInt(value, 10) || 0;
-      } else {
-        event[header] = value;
+export const parseCSV = (csvText: string): Event[] => {
+  const results = Papa.parse<Event>(csvText, {
+    header: true,
+    dynamicTyping: true,
+    skipEmptyLines: true,
+    transform: (value, header) => {
+      // Ensure price_cents is treated as a number, defaulting to 0
+      if (header === 'price_cents') {
+        return value === '' || value === null ? 0 : Number(value);
       }
-    });
-    
-    return event as Event;
-  });
-}
-
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
+      return value;
     }
+  });
+
+  if (results.errors.length) {
+    console.error("CSV Parsing Errors:", results.errors);
   }
-  
-  result.push(current.trim());
-  return result;
-}
+
+  return results.data;
+};
