@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,6 +10,12 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { TaskType } from "@google/generative-ai";
 import { Document } from "langchain/document";
 import Papa from 'papaparse';
+
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,11 +27,6 @@ let isInitialized = false;
 let isInitializing = false;
 let searchCache = new Map();
 const CACHE_SIZE_LIMIT = 100;
-
-// Performance monitoring
-let initStartTime = null;
-let searchCount = 0;
-let totalSearchTime = 0;
 
 const parseCSV = (csvText) => {
   const results = Papa.parse(csvText, {
@@ -58,8 +61,8 @@ const createSearchText = (event) => {
 // Check if embeddings need to be regenerated
 const shouldRegenerateEmbeddings = async () => {
   try {
-    const csvPath = path.resolve(__dirname, '../data/dataBase.csv');
-    const embeddingsPath = path.resolve(__dirname, '../data/embeddings.json');
+    const csvPath = path.resolve(__dirname, 'data/dataBase.csv');
+    const embeddingsPath = path.resolve(__dirname, 'data/embeddings.json');
     
     const [csvStats, embeddingsStats] = await Promise.all([
       fs.stat(csvPath),
@@ -119,7 +122,7 @@ const generateEmbeddings = async (events) => {
   }
   
   // Save embeddings to file
-  const embeddingsPath = path.resolve(__dirname, '../data/embeddings.json');
+  const embeddingsPath = path.resolve(__dirname, 'data/embeddings.json');
   await fs.writeFile(embeddingsPath, JSON.stringify(embeddingMap, null, 2));
   
   const generationTime = Date.now() - startTime;
@@ -130,7 +133,7 @@ const generateEmbeddings = async (events) => {
 
 // Load or generate embeddings
 const loadEmbeddings = async () => {
-  const embeddingsPath = path.resolve(__dirname, '../data/embeddings.json');
+  const embeddingsPath = path.resolve(__dirname, 'data/embeddings.json');
   
   try {
     const needsRegeneration = await shouldRegenerateEmbeddings();
@@ -163,12 +166,11 @@ const initializeData = async () => {
   }
 
   isInitializing = true;
-  initStartTime = Date.now();
   
   try {
     console.log("Initializing comprehensive search data...");
     
-    const csvPath = path.resolve(__dirname, '../data/dataBase.csv');
+    const csvPath = path.resolve(__dirname, 'data/dataBase.csv');
     const csvText = await fs.readFile(csvPath, 'utf-8');
 
     events = parseCSV(csvText);
@@ -205,8 +207,7 @@ const initializeData = async () => {
 
     await vectorStore.addVectors(vectors, documents);
     
-    const initTime = Date.now() - initStartTime;
-    console.log(`Search initialized in ${initTime}ms. Loaded ${events.length} events and ${vectors.length} vectors.`);
+    console.log(`Search initialized. Loaded ${events.length} events and ${vectors.length} vectors.`);
     isInitialized = true;
   } catch (error) {
     console.error("Failed to initialize search:", error);
@@ -357,23 +358,6 @@ const filterEvents = (events, filters) => {
       return false;
     }
 
-    // Date filter (if provided)
-    if (filters.startDate) {
-      const eventDate = new Date(event.start_date);
-      const filterDate = new Date(filters.startDate);
-      if (eventDate < filterDate) {
-        return false;
-      }
-    }
-
-    if (filters.endDate) {
-      const eventDate = new Date(event.start_date);
-      const filterDate = new Date(filters.endDate);
-      if (eventDate > filterDate) {
-        return false;
-      }
-    }
-
     return true;
   });
 };
@@ -391,41 +375,32 @@ const setCachedResult = (query, results) => {
   searchCache.set(query, results);
 };
 
-export default async function handler(req, res) {
+// API Endpoints
+app.get('/api/events', async (req, res) => {
+  try {
+    await initializeData();
+    res.json(events);
+  } catch (error) {
+    console.error("Failed to load events:", error);
+    res.status(500).json({ error: "Failed to load events" });
+  }
+});
+
+app.post('/api/search', async (req, res) => {
   const requestStartTime = Date.now();
   
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
-    // Initialize data if not already done (async)
     await initializeData();
 
     const { query } = req.body;
 
     if (!query || !query.trim()) {
-      const responseTime = Date.now() - requestStartTime;
-      console.log(`Empty query response in ${responseTime}ms`);
       return res.json(events);
     }
 
     // Check cache first
     const cachedResult = getCachedResult(query);
     if (cachedResult) {
-      const responseTime = Date.now() - requestStartTime;
-      console.log(`Cache hit for "${query}" in ${responseTime}ms`);
       return res.json(cachedResult);
     }
 
@@ -467,27 +442,59 @@ export default async function handler(req, res) {
     // Cache the result
     setCachedResult(query, searchResults);
 
-    // Performance tracking
-    searchCount++;
     const responseTime = Date.now() - requestStartTime;
-    totalSearchTime += responseTime;
-    const avgSearchTime = totalSearchTime / searchCount;
-    
-    // Expose metrics globally for monitoring
-    global.searchCount = searchCount;
-    global.avgSearchTime = avgSearchTime;
-    global.cacheSize = searchCache.size;
-    
-    console.log(`Search "${query}" completed in ${responseTime}ms (avg: ${avgSearchTime.toFixed(1)}ms, results: ${searchResults.length})`);
+    console.log(`Search "${query}" completed in ${responseTime}ms (results: ${searchResults.length})`);
 
     res.json(searchResults);
 
   } catch (error) {
-    const responseTime = Date.now() - requestStartTime;
-    console.error(`Search failed in ${responseTime}ms:`, error);
+    console.error("Search failed:", error);
     res.status(500).json({ 
       error: "Search failed. Please try again.",
       details: error.message 
     });
   }
-} 
+});
+
+app.get('/api/test', (req, res) => {
+  const memUsage = process.memoryUsage();
+  const memUsageMB = {
+    rss: Math.round(memUsage.rss / 1024 / 1024),
+    heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
+    heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
+    external: Math.round(memUsage.external / 1024 / 1024)
+  };
+
+  res.json({ 
+    status: "API is working!",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: {
+      hasGeminiKey: !!process.env.VITE_GEMINI_API_KEY,
+      nodeEnv: process.env.NODE_ENV,
+      platform: process.platform,
+      arch: process.arch
+    },
+    memory: memUsageMB,
+    performance: {
+      searchCount: 0,
+      avgSearchTime: 0,
+      cacheSize: searchCache.size,
+      isInitialized,
+      isInitializing
+    }
+  });
+});
+
+// Start server
+initializeData().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Optimized development server running on http://localhost:${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/api/test`);
+    console.log(`🔍 Search API: http://localhost:${PORT}/api/search`);
+    console.log(`📅 Events API: http://localhost:${PORT}/api/events`);
+  });
+}).catch(error => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
+}); 
