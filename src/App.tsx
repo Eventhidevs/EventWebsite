@@ -85,7 +85,7 @@ function App() {
           <div className="flex">
             <input
               type="text"
-              placeholder="Search events by name..."
+              placeholder="Search events..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-l-2xl focus:ring-2 focus:ring-[#724E99] focus:border-r-0 focus:border-transparent transition-all shadow-lg"

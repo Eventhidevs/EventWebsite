@@ -33,6 +33,7 @@ const CalendarBox: React.FC<CalendarBoxProps> = ({ selectedDates, setSelectedDat
               setSelectedDates({ start: dates[0], end: dates[1] });
             }}
             isClearable
+            withPortal
             placeholderText="Select date range"
             className="border border-gray-200 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 w-full text-center"
             calendarClassName="!rounded-xl !shadow-lg"
@@ -44,6 +45,7 @@ const CalendarBox: React.FC<CalendarBoxProps> = ({ selectedDates, setSelectedDat
             selected={selectedDates.start}
             onChange={(date: Date | null) => setSelectedDates({ start: date, end: null })}
             isClearable
+            withPortal
             placeholderText="Select date"
             className="border border-gray-200 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 w-full text-center"
             calendarClassName="!rounded-xl !shadow-lg"
