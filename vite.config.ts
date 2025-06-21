@@ -1,9 +1,18 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { copy } from 'fs-extra';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'copy-data-files',
+      writeBundle() {
+        copy('data', 'dist/data');
+      },
+    },
+  ],
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

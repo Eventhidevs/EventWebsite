@@ -5,15 +5,9 @@ import Filters, { PricingFilter } from './components/Filters';
 import EventsByDate from './components/EventsByDate';
 import CreateEventModal from './components/CreateEventModal';
 import Footer from './components/Footer';
-import { parseCSV, Event } from './utils/csvParser';
+import { Event } from './utils/csvParser';
 import CalendarBox from './components/CalendarBox';
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { TaskType } from "@google/generative-ai";
-import { Document } from "langchain/document";
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 const API_URL = '/api';
 
 function App() {
