@@ -220,10 +220,9 @@ function App() {
 
         {/* Search tips */}
         {!searchInput.trim() && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Search Tips:</strong> Try searching by event name, summary, category, or price. 
-              Examples: "free hackathon", "AI workshop", "networking events", "$50 conference"
+          <div className="mb-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs sm:text-sm text-blue-800">
+              <strong>💡</strong> Try: "free hackathon", "AI workshop", "networking"
             </p>
           </div>
         )}
