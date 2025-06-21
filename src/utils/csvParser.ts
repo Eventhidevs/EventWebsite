@@ -1,9 +1,11 @@
 import Papa from 'papaparse';
 
 export interface Event {
+  id: string;
   event_name: string;
   event_url: string;
   event_summary: string;
+  event_description: string;
   full_address: string;
   region: string;
   presented_by_name: string;
@@ -20,6 +22,7 @@ export const parseCSV = (csvText: string): Event[] => {
     header: true,
     dynamicTyping: true,
     skipEmptyLines: true,
+    transformHeader: (header) => header.trim(),
     transform: (value, header) => {
       // Ensure price_cents is treated as a number, defaulting to 0
       if (header === 'price_cents') {
@@ -33,5 +36,9 @@ export const parseCSV = (csvText: string): Event[] => {
     console.error("CSV Parsing Errors:", results.errors);
   }
 
-  return results.data;
+  // Manually add a unique ID to each event
+  return results.data.map((event, index) => ({
+    ...event,
+    id: `${index}-${event.event_name || ''}`
+  }));
 };
