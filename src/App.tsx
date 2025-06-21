@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Header from './components/Header';
+// import Header from './components/Header';
 import Hero from './components/Hero';
 import Filters, { PricingFilter } from './components/Filters';
 import EventsByDate from './components/EventsByDate';
@@ -77,7 +77,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <Header />
+      {/* <Header /> */}
       <Hero />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-12">
@@ -123,7 +123,7 @@ function App() {
           <div className="w-full sm:w-auto">
             <button
               type="button"
-              onClick={() => document.querySelector('form')?.requestSubmit()}
+              onClick={() => setIsModalOpen(true)}
               className="bg-[#724E99] text-white font-bold py-2 sm:py-3 px-6 rounded-2xl shadow-lg hover:bg-purple-700 transition-all w-full"
             >
               Submit Event

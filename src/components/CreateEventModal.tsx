@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, Clock, User, Tag, FileText, Link, Mail } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 
@@ -13,7 +13,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
     event_url: '',
     event_summary: '',
     full_address: '',
-    region: '',
+    cost: '',
     presented_by_name: '',
     start_date: '',
     start_time: '',
@@ -24,6 +24,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Initialize EmailJS
+  useEffect(() => {
+    emailjs.init('yOAgflGcPF9mseaJ-');
+  }, []);
 
   const categories = [
     'Startup & Entrepreneurship',
@@ -49,7 +54,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
     setIsSubmitting(true);
     
     try {
-      await emailjs.send(
+      console.log('Submitting form with data:', formData);
+      
+      const result = await emailjs.send(
         'service_wpcsqa8',
         'template_gpxoh3o',
         {
@@ -58,7 +65,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
           event_url: formData.event_url,
           event_summary: formData.event_summary,
           full_address: formData.full_address,
-          region: formData.region,
+          cost: formData.cost,
           presented_by_name: formData.presented_by_name,
           start_date: formData.start_date,
           start_time: formData.start_time,
@@ -69,9 +76,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
         },
         'yOAgflGcPF9mseaJ-'
       );
+      
+      console.log('Email sent successfully:', result);
       setSubmitSuccess(true);
     } catch (error) {
-      alert('Failed to send email. Please try again.');
+      console.error('Failed to send email:', error);
+      alert('Failed to send email. Please check the console for more details and try again.');
     }
     setIsSubmitting(false);
     
@@ -83,7 +93,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
         event_url: '',
         event_summary: '',
         full_address: '',
-        region: '',
+        cost: '',
         presented_by_name: '',
         start_date: '',
         start_time: '',
@@ -193,16 +203,16 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <MapPin className="h-4 w-4 inline mr-1" />
-                    Region
+                    Cost
                   </label>
                   <input
                     type="text"
-                    name="region"
-                    value={formData.region}
+                    name="cost"
+                    value={formData.cost}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="SOMA, Mission, etc."
+                    placeholder="Free, $10, $25, etc."
                   />
                 </div>
 
