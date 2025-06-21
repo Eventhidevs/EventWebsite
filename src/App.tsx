@@ -14,7 +14,7 @@ import { TaskType } from "@google/generative-ai";
 import { Document } from "langchain/document";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-const API_URL = 'http://localhost:3001';
+const API_URL = '/api';
 
 function App() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);

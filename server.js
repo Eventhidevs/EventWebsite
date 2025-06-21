@@ -91,12 +91,12 @@ const loadDataAndVectorStore = async () => {
 // --- API ENDPOINTS ---
 
 // Endpoint to get all events initially (unfiltered)
-app.get('/events', (req, res) => {
+app.get('/api/events', (req, res) => {
   res.json(events);
 });
 
 // Endpoint to handle search requests
-app.post('/search', async (req, res) => {
+app.post('/api/search', async (req, res) => {
   const { query } = req.body;
 
   if (!query) {
