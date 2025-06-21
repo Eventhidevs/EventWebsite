@@ -34,7 +34,7 @@ const generateEmbeddings = async () => {
   console.log("Starting embedding generation...");
 
   // 1. Load and parse the CSV data
-  const csvPath = path.resolve(__dirname, '../public/data/dataBase.csv');
+  const csvPath = path.resolve(__dirname, '../data/dataBase.csv');
   const csvText = await fs.readFile(csvPath, 'utf-8');
   const events = parseCSVForScript(csvText);
   console.log(`Found ${events.length} total events in CSV.`);
@@ -70,7 +70,7 @@ const generateEmbeddings = async () => {
   });
 
   // 6. Save the map to a JSON file
-  const outputPath = path.resolve(__dirname, '../public/data/embeddings.json');
+  const outputPath = path.resolve(__dirname, '../data/embeddings.json');
   await fs.writeFile(outputPath, JSON.stringify(embeddingMap));
 
   console.log(`Embeddings saved successfully to ${outputPath}`);
