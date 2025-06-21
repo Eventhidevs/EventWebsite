@@ -233,23 +233,23 @@ const parseQuery = (query) => {
   let category = null;
   const categoryKeywords = {
     'hackathon': 'Hackathon',
-    'workshop': 'Workshop',
+    'workshop': 'Tech & AI',
     'meetup': 'Networking & Community',
     'networking': 'Networking & Community',
-    'conference': 'Conference',
+    'conference': 'Tech & AI',
     'startup': 'Startup & Entrepreneurship',
     'entrepreneurship': 'Startup & Entrepreneurship',
     'ai': 'Tech & AI',
     'machine learning': 'Tech & AI',
     'tech': 'Tech & AI',
     'technology': 'Tech & AI',
-    'seminar': 'Seminar',
-    'webinar': 'Webinar',
-    'panel': 'Panel Discussion',
-    'discussion': 'Panel Discussion',
-    'lecture': 'Lecture',
-    'training': 'Training',
-    'course': 'Training',
+    'seminar': 'Education & Research',
+    'webinar': 'Education & Research',
+    'panel': 'Networking & Community',
+    'discussion': 'Networking & Community',
+    'lecture': 'Education & Research',
+    'training': 'Career & Skills',
+    'course': 'Education & Research',
     'education': 'Education & Research',
     'research': 'Education & Research',
     'career': 'Career & Skills',
@@ -425,7 +425,7 @@ export default async function handler(req, res) {
     const cachedResult = getCachedResult(query);
     if (cachedResult) {
       const responseTime = Date.now() - requestStartTime;
-      console.log(`Cache hit for "${query}" in ${responseTime}ms`);
+      console.log(`Cache hit for "${query}" in ${responseTime}ms, returning ${cachedResult.length} results`);
       return res.json(cachedResult);
     }
 
@@ -442,15 +442,23 @@ export default async function handler(req, res) {
     let searchResults = filteredEvents;
     if (parsedQuery.semanticQuery && vectorStore && filteredEvents.length > 0) {
       try {
-        const results = await vectorStore.similaritySearch(parsedQuery.semanticQuery, 20);
+        // Use a dynamic limit based on the number of filtered events, but cap at 50 for performance
+        const searchLimit = Math.min(filteredEvents.length, 50);
+        console.log(`Searching with limit: ${searchLimit}, filtered events: ${filteredEvents.length}`);
+        
+        const results = await vectorStore.similaritySearch(parsedQuery.semanticQuery, searchLimit);
+        console.log(`Vector store returned ${results.length} results`);
+        
         const semanticIds = new Set(results.map(result => result.metadata.id));
         
         // Filter to only include events that are both in the filtered set AND semantically relevant
         searchResults = filteredEvents.filter(event => semanticIds.has(event.id));
+        console.log(`After filtering with semantic IDs: ${searchResults.length} results`);
         
         // If semantic search returns too few results, fall back to enhanced text search
         if (searchResults.length < 5 && filteredEvents.length > 5) {
           const fallbackResults = enhancedTextSearch(parsedQuery.semanticQuery, filteredEvents);
+          console.log(`Fallback text search returned ${fallbackResults.length} results`);
           if (fallbackResults.length > searchResults.length) {
             searchResults = fallbackResults;
           }
@@ -479,6 +487,7 @@ export default async function handler(req, res) {
     global.cacheSize = searchCache.size;
     
     console.log(`Search "${query}" completed in ${responseTime}ms (avg: ${avgSearchTime.toFixed(1)}ms, results: ${searchResults.length})`);
+    console.log(`Final search results count: ${searchResults.length}`);
 
     res.json(searchResults);
 
