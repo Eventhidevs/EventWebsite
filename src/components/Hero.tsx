@@ -3,7 +3,7 @@ import logo from '../images/logo.png';
 
 const Hero: React.FC = () => {
   return (
-    <div className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl overflow-hidden">
+    <div className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl overflow-hidden mb-4">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
       <div className="relative max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4 sm:gap-12 text-center sm:text-left p-2">
         <div className="flex-shrink-0">
