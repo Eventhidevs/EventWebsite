@@ -7,11 +7,32 @@ import CreateEventModal from './components/CreateEventModal';
 import Footer from './components/Footer';
 import { Event } from './utils/csvParser';
 import CalendarBox from './components/CalendarBox';
+import TimeOfDayFilter from './components/TimeOfDayFilter';
 
 const API_URL = '/api';
 
+function isEventInTimeSlot(event: Event, slot: string) {
+  if (!event.start_time) return false;
+  const [hour, min] = event.start_time.split(':').map(Number);
+  const startMinutes = hour * 60 + min;
+
+  switch (slot) {
+    case "before6":
+      return startMinutes < 360; // before 6:00 am
+    case "morning":
+      return startMinutes >= 360 && startMinutes < 720; // 6:00 am - 12:00 pm
+    case "afternoon":
+      return startMinutes >= 720 && startMinutes < 1080; // 12:00 pm - 6:00 pm
+    case "after6":
+      return startMinutes >= 1080; // after 6:00 pm
+    default:
+      return true;
+  }
+}
+
 function App() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [baseEvents, setBaseEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -22,6 +43,7 @@ function App() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   const [initializationStatus, setInitializationStatus] = useState<string>('Loading events...');
+  const [selectedTimeOfDay, setSelectedTimeOfDay] = useState('');
 
   // Fetch all events on initial load
   useEffect(() => {
@@ -36,6 +58,7 @@ function App() {
         
         const data = await response.json();
         setAllEvents(data);
+        setBaseEvents(data);
         setFilteredEvents(data); // Initially, show all events
         setInitializationStatus('Events loaded successfully!');
       } catch (error) {
@@ -51,7 +74,7 @@ function App() {
   // Debounced search function with better error handling
   const debouncedSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
-      setFilteredEvents(allEvents);
+      setBaseEvents(allEvents);
       return;
     }
 
@@ -68,7 +91,7 @@ function App() {
       }
       
       const data = await response.json();
-      setFilteredEvents(data);
+      setBaseEvents(data);
     } catch (error) {
       console.error("Search request failed:", error);
       // Fallback to local search on error
@@ -86,7 +109,7 @@ function App() {
         
         return searchableText.includes(query.toLowerCase());
       });
-      setFilteredEvents(localResults);
+      setBaseEvents(localResults);
     } finally {
       setSearchLoading(false);
     }
@@ -104,7 +127,7 @@ function App() {
     // Set new timeout for debounced search
     const timeout = setTimeout(() => {
       debouncedSearch(value);
-    }, 300); // 300ms delay
+    }, 300);
     
     setSearchTimeout(timeout);
   }, [debouncedSearch, searchTimeout]);
@@ -128,14 +151,10 @@ function App() {
 
   const categories = useMemo(() => Array.from(new Set(allEvents.map(event => event.event_category).filter(Boolean))), [allEvents]);
 
-  // This effect will re-filter events locally when dropdown filters change
+  // This effect will re-filter events locally when dropdown filters change or baseEvents changes
   useEffect(() => {
-    let eventsToFilter = allEvents;
+    let eventsToFilter = baseEvents;
 
-    // Note: The main text search is now handled by the server.
-    // This local filtering is for the dropdowns only.
-    // A more advanced implementation might make a server request for every filter change.
-    
     const locallyFiltered = eventsToFilter.filter(event => {
       const categoryMatch = selectedCategory ? event.event_category === selectedCategory : true;
       const pricingMatch = (() => {
@@ -151,16 +170,13 @@ function App() {
         }
         return eventDate.toDateString() === selectedDates.start.toDateString();
       })();
-      return categoryMatch && pricingMatch && dateMatch;
+      const timeOfDayMatch = selectedTimeOfDay ? isEventInTimeSlot(event, selectedTimeOfDay) : true;
+
+      return categoryMatch && pricingMatch && dateMatch && timeOfDayMatch;
     });
     
-    // If a search query is active, we show the results from the server.
-    // Otherwise, we show the locally filtered results.
-    if (!searchInput.trim()) {
-      setFilteredEvents(locallyFiltered);
-    }
-
-  }, [selectedCategory, selectedPricing, selectedDates, allEvents, searchInput]);
+    setFilteredEvents(locallyFiltered);
+  }, [selectedCategory, selectedPricing, selectedDates, selectedTimeOfDay, baseEvents]);
 
   if (loading) {
     return (
@@ -179,35 +195,38 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* <Header /> */}
-      <Hero />
-      
+      <div className="relative">
+        <Hero />
+      </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-12">
-        <form className="mb-2" onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
-          <div className="flex relative">
-            <input
-              type="text"
-              placeholder="Search events by name, summary, category, or price..."
-              value={searchInput}
-              onChange={(e) => handleSearchInputChange(e.target.value)}
-              className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-l-2xl focus:ring-2 focus:ring-[#724E99] focus:border-r-0 focus:border-transparent transition-all shadow-lg"
-            />
-            <button
-              type="submit"
-              disabled={searchLoading}
-              className="bg-[#724E99] text-white font-bold py-2 sm:py-3 px-6 rounded-r-2xl shadow-lg hover:bg-purple-700 transition-all flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {searchLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Searching...
-                </>
-              ) : (
-                'Search'
-              )}
-            </button>
-          </div>
+        {/* Search Row: Only Search Filter, full width */}
+        <form
+          className="w-full flex mb-4"
+          onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+        >
+          <input
+            type="text"
+            placeholder="Search events by name, summary, category, or price..."
+            value={searchInput}
+            onChange={(e) => handleSearchInputChange(e.target.value)}
+            className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-l-2xl focus:ring-2 focus:ring-[#724E99] focus:border-r-0 focus:border-transparent transition-all shadow-lg"
+          />
+          <button
+            type="submit"
+            disabled={searchLoading}
+            className="bg-[#724E99] text-white font-bold py-2 sm:py-3 px-6 rounded-r-2xl shadow-lg hover:bg-purple-700 transition-all flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {searchLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Searching...
+              </>
+            ) : (
+              'Search'
+            )}
+          </button>
         </form>
-        
+
         {/* Search loading indicator */}
         {searchLoading && (
           <div className="mb-4 text-center">
@@ -227,36 +246,33 @@ function App() {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
-          <div className="flex-1 flex gap-4">
-            <div className="flex-[1.5_1_0%]">
+        <div className="mb-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 w-full">
+            {/* Left column: Filter Events */}
+            <div className="col-span-1">
               <Filters
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 categories={categories}
+                selectedTimeOfDay={selectedTimeOfDay}
+                setSelectedTimeOfDay={setSelectedTimeOfDay}
               />
             </div>
-            <div className="flex-1">
-              <PricingFilter
-                selectedPricing={selectedPricing}
-                setSelectedPricing={setSelectedPricing}
-              />
+            {/* Right column: Date and Pricing stacked on mobile, row on desktop */}
+            <div className="col-span-1 flex flex-col gap-2 sm:flex-row sm:gap-4">
+              <div>
+                <CalendarBox
+                  selectedDates={selectedDates}
+                  setSelectedDates={setSelectedDates}
+                />
+              </div>
+              <div>
+                <PricingFilter
+                  selectedPricing={selectedPricing}
+                  setSelectedPricing={setSelectedPricing}
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <CalendarBox
-                selectedDates={selectedDates}
-                setSelectedDates={setSelectedDates}
-              />
-            </div>
-          </div>
-          <div className="w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="bg-[#724E99] text-white font-bold py-2 sm:py-3 px-6 rounded-2xl shadow-lg hover:bg-purple-700 transition-all w-full"
-            >
-              Submit Event
-            </button>
           </div>
         </div>
         <div className="hidden sm:flex items-center justify-between mb-2">

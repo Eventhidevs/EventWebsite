@@ -19,15 +19,26 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
     return !isNaN(dateObj.getTime());
   }), [events]);
 
-  // Group events by date
-  const groupedEvents = useMemo(() => validEvents.reduce((groups, event) => {
-    const date = event.start_date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(event);
+  // Group events by date and sort by start_time within each date
+  const groupedEvents = useMemo(() => {
+    const groups: Record<string, Event[]> = {};
+    validEvents.forEach(event => {
+      const date = event.start_date;
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(event);
+    });
+    // Sort each group by start_time
+    Object.keys(groups).forEach(date => {
+      groups[date].sort((a, b) => {
+        if (!a.start_time) return 1;
+        if (!b.start_time) return -1;
+        return a.start_time.localeCompare(b.start_time);
+      });
+    });
     return groups;
-  }, {} as Record<string, Event[]>), [validEvents]);
+  }, [validEvents]);
 
   // Sort dates
   const sortedDates = useMemo(() => Object.keys(groupedEvents).sort((a, b) => 
@@ -81,28 +92,28 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
     const dateObj = new Date(date);
     const today = new Date();
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    // Reset time for comparison
+    tomorrow.setDate(today.getDate() + 1);
+
     today.setHours(0, 0, 0, 0);
     tomorrow.setHours(0, 0, 0, 0);
     dateObj.setHours(0, 0, 0, 0);
-    
+
     if (dateObj.getTime() === today.getTime()) {
       return 'Today';
     } else if (dateObj.getTime() === tomorrow.getTime()) {
       return 'Tomorrow';
     } else {
-      return new Intl.DateTimeFormat('en-US', {
+      return dateObj.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'long',
         day: 'numeric',
         year: 'numeric',
-      }).format(dateObj);
+      });
     }
   };
 
   const formatTime = (time: string) => {
+    if (!time) return '';
     const [hours, minutes] = time.split(':');
     const date = new Date();
     date.setHours(parseInt(hours), parseInt(minutes));
@@ -176,7 +187,7 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                   <div className="flex-shrink-0 lg:w-24">
                     <div className="flex items-center text-sm font-medium text-gray-900">
                       <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                      {event.start_time}
+                      {formatTime(event.start_time)}
                     </div>
                   </div>
 

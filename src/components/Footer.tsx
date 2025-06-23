@@ -37,6 +37,17 @@ const Footer: React.FC = () => {
             <div className="text-lg text-gray-700 mt-2 mb-4">
               Visit: <a href="https://hidevs.xyz" target="_blank" rel="noopener noreferrer" className="font-semibold underline text-[#724E99]">hidevs.xyz</a>
             </div>
+            <div className="flex flex-col items-start gap-2 mb-4">
+              <div className="text-base font-semibold text-gray-900">To Feature Events:</div>
+              <button
+                type="button"
+                onClick={() => alert('Open Submit Event Modal')}
+                className="bg-[#724E99] text-white font-semibold text-base py-2 px-6 rounded-xl shadow-md hover:bg-purple-700 transition-all flex items-center gap-2"
+              >
+                <span className="text-lg leading-none">+</span>
+                Submit Event
+              </button>
+            </div>
             <div className="flex items-center gap-4 mt-4">
               <a href="https://www.linkedin.com/company/hidevs-gen-ai-workforce/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center text-blue-700 hover:text-blue-900 transition text-2xl">
                 <FaLinkedin size={32} />
