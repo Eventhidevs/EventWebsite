@@ -13,8 +13,17 @@ const API_URL = '/api';
 
 function isEventInTimeSlot(event: Event, slot: string) {
   if (!event.start_time) return false;
-  const [hour, min] = event.start_time.split(':').map(Number);
-  const startMinutes = hour * 60 + min;
+  // Parse start_time (assume format like '09:30 PM' or '12:30 AM')
+  let [time, meridian] = event.start_time.split(' ');
+  let [hour, min] = time.split(':').map(Number);
+  if (meridian && meridian.toUpperCase() === 'PM' && hour !== 12) hour += 12;
+  if (meridian && meridian.toUpperCase() === 'AM' && hour === 12) hour = 0;
+  // Subtract 12 hours 30 minutes to convert IST to SF time
+  let totalMinutes = hour * 60 + min - 12 * 60 - 30;
+  if (totalMinutes < 0) totalMinutes += 24 * 60; // wrap around if negative
+  const sfHour = Math.floor(totalMinutes / 60);
+  const sfMin = totalMinutes % 60;
+  const startMinutes = sfHour * 60 + sfMin;
 
   switch (slot) {
     case "before6":
