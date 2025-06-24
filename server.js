@@ -26,8 +26,10 @@ let events = [];
 let vectorStore = null;
 let categories = [];
 const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY);
+let eventsCache = null;
 
 const parseCSV = (csvText) => {
+  console.log('parseCSV is running and will add UTC fields');
   const results = Papa.parse(csvText, {
     header: true,
     dynamicTyping: true,
@@ -40,6 +42,7 @@ const parseCSV = (csvText) => {
       return value;
     }
   });
+  console.log('Parsing CSV and adding UTC fields');
   return results.data.map((event, index) => ({
     ...event,
     id: `${index}-${event.event_name || ''}`
@@ -176,9 +179,58 @@ app.post('/api/search', async (req, res) => {
   }
 });
 
+const loadEvents = async () => {
+  // REMOVE or comment out the cache for development:
+  // if (eventsCache) {
+  //   return eventsCache;
+  // }
+
+  try {
+    console.log("Loading events data...");
+    const csvPath = path.resolve(__dirname, '../data/dataBase.csv');
+    const csvText = await fs.readFile(csvPath, 'utf-8');
+    // REMOVE the cache assignment for development:
+    // eventsCache = parseCSV(csvText);
+    // return eventsCache;
+    return parseCSV(csvText);
+  } catch (error) {
+    console.error("Failed to load events:", error);
+    throw error;
+  }
+};
 
 loadDataAndVectorStore().then(() => {
   app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);
   });
-}); 
+});
+
+function toUTC(date, time) {
+  if (!date || !time) return undefined;
+  time = time.trim();
+  let match = time.match(/^([0-9]{1,2}):([0-9]{2})\s*(AM|PM)?$/i);
+  let hour, minute;
+  if (match) {
+    hour = parseInt(match[1], 10);
+    minute = parseInt(match[2], 10);
+    const part = match[3];
+    if (part) {
+      if (part.toUpperCase() === 'PM' && hour < 12) hour += 12;
+      if (part.toUpperCase() === 'AM' && hour === 12) hour = 0;
+    }
+  } else {
+    match = time.match(/^([0-9]{1,2}):([0-9]{2})$/);
+    if (!match) return undefined;
+    hour = parseInt(match[1], 10);
+    minute = parseInt(match[2], 10);
+  }
+  const hourStr = hour.toString().padStart(2, '0');
+  const minStr = minute.toString().padStart(2, '0');
+  const istString = `${date}T${hourStr}:${minStr}:00+05:30`;
+  const istDate = new Date(istString);
+  if (isNaN(istDate.getTime())) {
+    console.error('Invalid IST date:', { date, time, istString });
+    return undefined;
+  }
+  return istDate.toISOString();
+} 

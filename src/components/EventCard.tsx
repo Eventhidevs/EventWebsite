@@ -14,6 +14,8 @@ interface Event {
   end_time: string;
   event_category: string;
   price_cents: string;
+  start_datetime_utc?: string;
+  end_datetime_utc?: string;
 }
 
 interface EventCardProps {
@@ -44,6 +46,18 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       'Education': 'bg-yellow-100 text-yellow-800',
     };
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  const formatDateTimeLocal = (utcString?: string, fallbackDate?: string, fallbackTime?: string) => {
+    if (utcString) {
+      const date = new Date(utcString);
+      return date.toLocaleString();
+    }
+    if (fallbackDate && fallbackTime) {
+      const date = new Date(`${fallbackDate}T${fallbackTime}`);
+      return date.toLocaleString();
+    }
+    return '';
   };
 
   return (
@@ -77,11 +91,11 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         <div className="space-y-3 mb-6">
           <div className="flex items-center text-sm text-gray-500">
             <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>{formatDate(event.start_date)}</span>
+            <span>{formatDateTimeLocal(event.start_datetime_utc, event.start_date, event.start_time).split(',')[0]}</span>
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>{formatTime(event.start_time)} - {formatTime(event.end_time)}</span>
+            <span>{formatDateTimeLocal(event.start_datetime_utc, event.start_date, event.start_time).split(',')[1]?.trim()} - {formatDateTimeLocal(event.end_datetime_utc, event.end_date, event.end_time).split(',')[1]?.trim()}</span>
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />

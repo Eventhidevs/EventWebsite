@@ -112,9 +112,16 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
     }
   };
 
-  const formatTime = (time: string) => {
-    if (!time) return '';
-    return time;
+  const formatTimeLocal = (utcString?: string, fallbackDate?: string, fallbackTime?: string) => {
+    if (utcString) {
+      const date = new Date(utcString);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    if (fallbackDate && fallbackTime) {
+      const date = new Date(`${fallbackDate}T${fallbackTime}`);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return '';
   };
 
   const getCategoryColor = (category: string) => {
@@ -180,7 +187,7 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                   <div className="flex-shrink-0 lg:w-24">
                     <div className="flex items-center text-sm font-medium text-gray-900">
                       <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                      {formatTime(event.start_time)}
+                      {formatTimeLocal(event.start_datetime_utc, event.start_date, event.start_time)}
                     </div>
                   </div>
 
