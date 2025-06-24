@@ -294,7 +294,7 @@ function App() {
         <EventsByDate events={filteredEvents} />
       </div>
 
-      <Footer />
+      <Footer onOpenModal={() => setIsModalOpen(true)} />
       
       <CreateEventModal
         isOpen={isModalOpen}

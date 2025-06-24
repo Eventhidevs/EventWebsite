@@ -5,7 +5,7 @@ import prakharProfile from '../images/prakhar_profile.jpg';
 import deepaksirProfile from '../images/deepaksir_profile.jpg';
 import { FaLinkedin, FaYoutube } from 'react-icons/fa';
 
-const Footer: React.FC = () => {
+const Footer: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
   return (
     <footer className="border-t border-gray-200 py-4 px-2" style={{ background: '#FBF2FF' }}>
       <div className="w-full flex flex-col gap-2 bg-transparent">
@@ -41,7 +41,7 @@ const Footer: React.FC = () => {
               <div className="text-base font-semibold text-gray-900">To Feature Events:</div>
               <button
                 type="button"
-                onClick={() => alert('Open Submit Event Modal')}
+                onClick={onOpenModal}
                 className="bg-[#724E99] text-white font-semibold text-base py-2 px-6 rounded-xl shadow-md hover:bg-purple-700 transition-all flex items-center gap-2"
               >
                 <span className="text-lg leading-none">+</span>
