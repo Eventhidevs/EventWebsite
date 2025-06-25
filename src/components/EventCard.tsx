@@ -31,10 +31,6 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
     }).format(new Date(date));
   };
 
-  const formatTime = (time: string) => {
-    return time;
-  };
-
   const getCategoryColor = (category: string) => {
     const colors = {
       'Technology': 'bg-blue-100 text-blue-800',

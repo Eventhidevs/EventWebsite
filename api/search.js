@@ -40,7 +40,8 @@ const parseCSV = (csvText) => {
   });
   return results.data.map((event, index) => ({
     ...event,
-    id: `${index}-${event.event_name || ''}`
+    id: `${index}-${event.event_name || ''}`,
+    start_datetime_utc: event.start_datetime_utc || null,
   }));
 };
 
