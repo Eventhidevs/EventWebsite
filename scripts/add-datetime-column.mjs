@@ -31,16 +31,22 @@ function toUTC(date, time) {
   
   // Parse time and convert to 24-hour format
   let hour, minute;
-  const timeMatch = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
-  if (timeMatch) {
-    hour = parseInt(timeMatch[1]);
-    minute = parseInt(timeMatch[2]);
-    const period = timeMatch[3].toUpperCase();
-    
+  const ampmMatch = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (ampmMatch) {
+    hour = parseInt(ampmMatch[1]);
+    minute = parseInt(ampmMatch[2]);
+    const period = ampmMatch[3].toUpperCase();
     if (period === 'PM' && hour !== 12) hour += 12;
     if (period === 'AM' && hour === 12) hour = 0;
   } else {
-    return undefined;
+    // Try 24-hour format (e.g., 20:30)
+    const twentyFourMatch = time.match(/^(\d{1,2}):(\d{2})$/);
+    if (twentyFourMatch) {
+      hour = parseInt(twentyFourMatch[1]);
+      minute = parseInt(twentyFourMatch[2]);
+    } else {
+      return undefined;
+    }
   }
   
   // Create IST datetime string
