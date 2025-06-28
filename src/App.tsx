@@ -8,6 +8,8 @@ import Footer from './components/Footer';
 import { Event } from './utils/csvParser';
 import CalendarBox from './components/CalendarBox';
 import TimeOfDayFilter from './components/TimeOfDayFilter';
+import FilterModal from './components/FilterModal';
+import { SlidersHorizontal } from 'lucide-react';
 
 const API_URL = '/api';
 
@@ -49,6 +51,14 @@ function App() {
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   const [initializationStatus, setInitializationStatus] = useState<string>('Loading events...');
   const [selectedTimeOfDay, setSelectedTimeOfDay] = useState('');
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState('');
+
+  const locations = useMemo(() => {
+    const locs = Array.from(new Set(allEvents.map(event => event.region).filter(Boolean)));
+    if (!locs.includes('Dubai')) locs.push('Dubai');
+    return locs;
+  }, [allEvents]);
 
   // Fetch all events on initial load
   useEffect(() => {
@@ -162,6 +172,7 @@ function App() {
 
     const locallyFiltered = eventsToFilter.filter(event => {
       const categoryMatch = selectedCategory ? event.event_category === selectedCategory : true;
+      const locationMatch = selectedLocation ? event.region === selectedLocation : true;
       const pricingMatch = (() => {
         if (selectedPricing === 'free') return event.price_cents <= 0;
         if (selectedPricing === 'paid') return event.price_cents > 0;
@@ -177,11 +188,11 @@ function App() {
       })();
       const timeOfDayMatch = selectedTimeOfDay ? isEventInTimeSlot(event, selectedTimeOfDay) : true;
 
-      return categoryMatch && pricingMatch && dateMatch && timeOfDayMatch;
+      return categoryMatch && locationMatch && pricingMatch && dateMatch && timeOfDayMatch;
     });
     
     setFilteredEvents(locallyFiltered);
-  }, [selectedCategory, selectedPricing, selectedDates, selectedTimeOfDay, baseEvents]);
+  }, [selectedCategory, selectedLocation, selectedPricing, selectedDates, selectedTimeOfDay, baseEvents]);
 
   if (loading) {
     return (
@@ -204,82 +215,119 @@ function App() {
         <Hero />
       </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-12">
-        {/* Search Row: Only Search Filter, full width */}
-        <form
-          className="w-full flex mb-4"
-          onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
-        >
-          <input
-            type="text"
-            placeholder="Search events by name, summary, category, or price..."
-            value={searchInput}
-            onChange={(e) => handleSearchInputChange(e.target.value)}
-            className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-l-2xl focus:ring-2 focus:ring-[#724E99] focus:border-r-0 focus:border-transparent transition-all shadow-lg"
-          />
-          <button
-            type="submit"
-            disabled={searchLoading}
-            className="bg-[#724E99] text-white font-bold py-2 sm:py-3 px-6 rounded-r-2xl shadow-lg hover:bg-purple-700 transition-all flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* Desktop: search/filter row, then tips row. Mobile: stacked order. */}
+        {/* Search bar and filter button row (desktop: flex row, mobile: stacked) */}
+        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:gap-4 mb-0">
+          {/* Search bar */}
+          <form
+            className="flex-1 flex mb-2 sm:mb-0"
+            onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
           >
-            {searchLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Searching...
-              </>
-            ) : (
-              'Search'
-            )}
-          </button>
-        </form>
-
-        {/* Search loading indicator */}
-        {searchLoading && (
-          <div className="mb-4 text-center">
-            <div className="inline-flex items-center text-sm text-gray-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#724E99] mr-2"></div>
-              Searching events with AI-powered semantic search...
-            </div>
+            <input
+              type="text"
+              placeholder="Search events by name, summary, category, or price..."
+              value={searchInput}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
+              className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-l-2xl focus:ring-2 focus:ring-[#724E99] focus:border-r-0 focus:border-transparent transition-all shadow-lg text-base"
+            />
+            <button
+              type="submit"
+              disabled={searchLoading}
+              className="bg-[#724E99] text-white font-bold py-2.5 sm:py-3 px-6 rounded-r-2xl shadow-lg hover:bg-purple-700 transition-all flex items-center disabled:opacity-50 disabled:cursor-not-allowed text-base"
+            >
+              {searchLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Searching...
+                </>
+              ) : (
+                'Search'
+              )}
+            </button>
+          </form>
+          {/* Filter button */}
+          <div className="w-full sm:w-auto flex justify-end mb-4 sm:mb-0">
+            <button
+              type="button"
+              onClick={() => setIsFilterModalOpen(true)}
+              className="flex items-center gap-2 px-6 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-2xl shadow-lg hover:bg-gray-100 transition-all text-[#724E99] font-semibold w-full sm:w-auto justify-center text-base"
+              style={{ height: '48px' }}
+            >
+              <span>Filter Events</span>
+              <SlidersHorizontal className="h-6 w-6" />
+            </button>
           </div>
-        )}
-
-        {/* Search tips */}
+        </div>
+        {/* Tips row: always below search/filter row on desktop, second row on mobile */}
         {!searchInput.trim() && (
-          <div className="mb-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mb-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg w-full">
             <p className="text-xs sm:text-sm text-blue-800">
               <strong>💡</strong> Try: "free hackathon", "AI workshop", "networking"
             </p>
           </div>
         )}
 
-        <div className="mb-2">
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 w-full">
-            {/* Left column: Filter Events */}
-            <div className="col-span-1">
-              <Filters
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                categories={categories}
-                selectedTimeOfDay={selectedTimeOfDay}
-                setSelectedTimeOfDay={setSelectedTimeOfDay}
+        {/* Filter Modal */}
+        <FilterModal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)}>
+          {/* Order: categories, calendar, time of day, location, pricing */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
+              >
+                <option value="">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <CalendarBox
+                selectedDates={selectedDates}
+                setSelectedDates={setSelectedDates}
               />
             </div>
-            {/* Right column: Date and Pricing stacked on mobile, row on desktop */}
-            <div className="col-span-1 flex flex-col gap-2 sm:flex-row sm:gap-4">
-              <div>
-                <CalendarBox
-                  selectedDates={selectedDates}
-                  setSelectedDates={setSelectedDates}
-                />
-              </div>
-              <div>
-                <PricingFilter
-                  selectedPricing={selectedPricing}
-                  setSelectedPricing={setSelectedPricing}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Time of Day</label>
+              <TimeOfDayFilter
+                value={selectedTimeOfDay}
+                onChange={setSelectedTimeOfDay}
+                className="w-full"
+                dropdownClassName="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
+              >
+                <option value="">All Locations</option>
+                {locations.map((location) => (
+                  <option key={location} value={location}>{location}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Pricing</label>
+              <select
+                value={selectedPricing}
+                onChange={(e) => setSelectedPricing(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#724E99] focus:border-transparent transition-all appearance-none bg-white"
+              >
+                <option value="">All</option>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
             </div>
           </div>
-        </div>
+        </FilterModal>
+
         <div className="hidden sm:flex items-center justify-between mb-2">
           <div className="flex items-center space-x-4">
             <h2 className="text-base sm:text-2xl font-bold text-gray-900">
