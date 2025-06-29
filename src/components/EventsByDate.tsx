@@ -153,7 +153,6 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
           <span className="text-4xl">🔍</span>
         </div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">No valid events found</h3>
-        <p className="text-gray-600 mb-4">Check your CSV for missing or invalid dates.</p>
       </div>
     );
   }
