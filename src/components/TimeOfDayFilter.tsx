@@ -41,15 +41,6 @@ export default function TimeOfDayFilter({ value, onChange, className = '', dropd
               {slot.label}
             </button>
           ))}
-          {value && (
-            <button
-              className="mt-1 text-xs text-red-500 hover:underline text-left px-3"
-              onClick={() => { onChange(""); setOpen(false); }}
-              type="button"
-            >
-              Clear Time Filter
-            </button>
-          )}
         </div>
       )}
     </div>

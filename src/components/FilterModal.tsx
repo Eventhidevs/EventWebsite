@@ -4,10 +4,11 @@ import { X } from 'lucide-react';
 interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onClearFilters?: () => void;
   children: React.ReactNode;
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, children }) => {
+const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onClearFilters, children }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -25,6 +26,14 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, children }) 
         <div className="space-y-4">
           {children}
         </div>
+        {onClearFilters && (
+          <button
+            onClick={onClearFilters}
+            className="mt-6 w-full border border-[#724E99] text-[#724E99] font-semibold py-2 rounded-xl hover:bg-[#F3EAFE] transition-all"
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ export interface Event {
   event_description: string;
   full_address: string;
   region: string;
+  Event_City: string;
   presented_by_name: string;
   start_date: string;
   start_time: string;
