@@ -179,6 +179,21 @@ function App() {
   useEffect(() => {
     let eventsToFilter = baseEvents;
 
+    // Filter out events that are in the past (using start_datetime_utc)
+    const now = new Date();
+    eventsToFilter = eventsToFilter.filter(event => {
+      if (event.start_datetime_utc) {
+        const eventDate = new Date(event.start_datetime_utc);
+        return eventDate > now;
+      }
+      // If no UTC, fallback to start_date + start_time if available
+      if (event.start_date && event.start_time) {
+        const fallbackDate = new Date(`${event.start_date}T${event.start_time}`);
+        return fallbackDate > now;
+      }
+      return false;
+    });
+
     const locallyFiltered = eventsToFilter.filter(event => {
       const categoryMatch = selectedCategory ? event.event_category === selectedCategory : true;
       const locationMatch = selectedLocation ? event.Event_City === selectedLocation : true;
