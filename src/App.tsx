@@ -179,17 +179,12 @@ function App() {
   useEffect(() => {
     let eventsToFilter = baseEvents;
 
-    // Filter out events that are in the past (using start_datetime_utc)
+    // Only use start_datetime_utc for filtering future events
     const now = new Date();
     eventsToFilter = eventsToFilter.filter(event => {
       if (event.start_datetime_utc) {
         const eventDate = new Date(event.start_datetime_utc);
         return eventDate > now;
-      }
-      // If no UTC, fallback to start_date + start_time if available
-      if (event.start_date && event.start_time) {
-        const fallbackDate = new Date(`${event.start_date}T${event.start_time}`);
-        return fallbackDate > now;
       }
       return false;
     });
@@ -202,21 +197,12 @@ function App() {
         if (selectedPricing === 'paid') return event.price_cents > 0;
         return true;
       })();
-      const dateMatch = (() => {
-        if (!selectedDates.start) return true;
-        const eventDate = new Date(event.start_date);
-        if (selectedDates.end) {
-          return eventDate >= selectedDates.start && eventDate <= selectedDates.end;
-        }
-        return eventDate.toDateString() === selectedDates.start.toDateString();
-      })();
-      const timeOfDayMatch = selectedTimeOfDay ? isEventInTimeSlot(event, selectedTimeOfDay) : true;
-
-      return categoryMatch && locationMatch && pricingMatch && dateMatch && timeOfDayMatch;
+      // Remove dateMatch and timeOfDayMatch if they depend on removed fields
+      return categoryMatch && locationMatch && pricingMatch;
     });
     
     setFilteredEvents(locallyFiltered);
-  }, [selectedCategory, selectedLocation, selectedPricing, selectedDates, selectedTimeOfDay, baseEvents]);
+  }, [selectedCategory, selectedLocation, selectedPricing, baseEvents]);
 
   // Mock data for the bar chart
   const mockWeeklyData = [

@@ -21,13 +21,19 @@ const parseCSV = (csvText) => {
     }
   });
 
-  return results.data.map((event, index) => ({
-    ...event,
-    id: `${index}-${event.event_name || ''}`,
-    // Use the start_datetime_utc column directly from CSV
-    start_datetime_utc: event.start_datetime_utc || null,
-    end_datetime_utc: event.end_datetime_utc || null,
-  }));
+  // Debug: log the keys of the first event
+  if (results.data.length > 0) {
+    console.log('First event keys:', Object.keys(results.data[0]));
+  }
+
+  return results.data.map((event, index) => {
+    return {
+      ...event,
+      id: `${index}-${event.event_name || ''}`,
+      start_datetime_utc: event.start_datetime_utc || null,
+      end_datetime_utc: event.end_datetime_utc || null,
+    };
+  });
 };
 
 // Cache for events data

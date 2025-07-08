@@ -12,29 +12,27 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const eventsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Filter out events with invalid or empty start_date
+  // Filter out events with invalid or empty start_datetime_utc
   const validEvents = useMemo(() => events.filter(event => {
-    if (!event.start_date) return false;
-    const dateObj = new Date(event.start_date);
+    if (!event.start_datetime_utc) return false;
+    const dateObj = new Date(event.start_datetime_utc);
     return !isNaN(dateObj.getTime());
   }), [events]);
 
-  // Group events by date and sort by start_time within each date
+  // Group events by the date part of start_datetime_utc
   const groupedEvents = useMemo(() => {
     const groups: Record<string, Event[]> = {};
     validEvents.forEach(event => {
-      const date = event.start_date;
+      const date = event.start_datetime_utc.split('T')[0];
       if (!groups[date]) {
         groups[date] = [];
       }
       groups[date].push(event);
     });
-    // Sort each group by start_time
+    // Sort each group by start_datetime_utc
     Object.keys(groups).forEach(date => {
       groups[date].sort((a, b) => {
-        if (!a.start_time) return 1;
-        if (!b.start_time) return -1;
-        return a.start_time.localeCompare(b.start_time);
+        return (a.start_datetime_utc || '').localeCompare(b.start_datetime_utc || '');
       });
     });
     return groups;
@@ -112,13 +110,9 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
     }
   };
 
-  const formatTimeLocal = (utcString?: string, fallbackDate?: string, fallbackTime?: string) => {
+  const formatTimeLocal = (utcString?: string) => {
     if (utcString) {
       const date = new Date(utcString);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    if (fallbackDate && fallbackTime) {
-      const date = new Date(`${fallbackDate}T${fallbackTime}`);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     return '';
@@ -186,7 +180,7 @@ const EventsByDate: React.FC<EventsByDateProps> = ({ events }) => {
                   <div className="flex-shrink-0 lg:w-24">
                     <div className="flex items-center text-sm font-medium text-gray-900">
                       <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                      {formatTimeLocal(event.start_datetime_utc, event.start_date, event.start_time)}
+                      {formatTimeLocal(event.start_datetime_utc)}
                     </div>
                   </div>
 

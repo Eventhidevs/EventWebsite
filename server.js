@@ -45,7 +45,9 @@ const parseCSV = (csvText) => {
   console.log('Parsing CSV and adding UTC fields');
   return results.data.map((event, index) => ({
     ...event,
-    id: `${index}-${event.event_name || ''}`
+    id: `${index}-${event.event_name || ''}`,
+    start_datetime_utc: event.start_datetime_utc || null,
+    end_datetime_utc: event.end_datetime_utc || null,
   }));
 };
 

@@ -6,16 +6,14 @@ interface Event {
   event_url: string;
   event_summary: string;
   full_address: string;
-  region: string;
+  city_state: string;
   presented_by_name: string;
-  start_date: string;
-  start_time: string;
-  end_date: string;
-  end_time: string;
+  start_datetime_utc: string;
+  end_datetime_utc: string;
   event_category: string;
-  price_cents: string;
-  start_datetime_utc?: string;
-  end_datetime_utc?: string;
+  price_cents: number;
+  event_description: string;
+  Event_City: string;
 }
 
 interface EventCardProps {
@@ -44,13 +42,9 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
-  const formatDateTimeLocal = (utcString?: string, fallbackDate?: string, fallbackTime?: string) => {
+  const formatDateTimeLocal = (utcString?: string) => {
     if (utcString) {
       const date = new Date(utcString);
-      return date.toLocaleString();
-    }
-    if (fallbackDate && fallbackTime) {
-      const date = new Date(`${fallbackDate}T${fallbackTime}`);
       return date.toLocaleString();
     }
     return '';
@@ -87,11 +81,11 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         <div className="space-y-3 mb-6">
           <div className="flex items-center text-sm text-gray-500">
             <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>{formatDateTimeLocal(event.start_datetime_utc, event.start_date, event.start_time).split(',')[0]}</span>
+            <span>{formatDateTimeLocal(event.start_datetime_utc).split(',')[0]}</span>
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>{formatDateTimeLocal(event.start_datetime_utc, event.start_date, event.start_time).split(',')[1]?.trim()} - {formatDateTimeLocal(event.end_datetime_utc, event.end_date, event.end_time).split(',')[1]?.trim()}</span>
+            <span>{formatDateTimeLocal(event.start_datetime_utc).split(',')[1]?.trim()} - {formatDateTimeLocal(event.end_datetime_utc).split(',')[1]?.trim()}</span>
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />

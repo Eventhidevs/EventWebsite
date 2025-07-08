@@ -77,8 +77,8 @@ const parseCSV = (csvText) => {
   return results.data.map((event, index) => ({
     ...event,
     id: `${index}-${event.event_name || ''}`,
-    start_datetime_utc: toUTC(event.start_date, event.start_time),
-    end_datetime_utc: toUTC(event.end_date, event.end_time),
+    start_datetime_utc: event.start_datetime_utc || null,
+    end_datetime_utc: event.end_datetime_utc || null,
   }));
 };
 
